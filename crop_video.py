@@ -6,7 +6,6 @@ import pandas as pd # To handle snippet selection
 from pytube import YouTube # To downlaod the video
 import moviepy.editor as mp # To crop videos
 from transformers import pipeline
-import scipy
 
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):
     # Gets important video metadata but does not download the mp4 file yet.
@@ -69,17 +68,19 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         x_center = int(vid_width / 2)
         y_center = int(vid_height / 2)
         cropped_video = best_clips.crop(x_center=x_center, y_center=y_center, width=new_width, height=vid_height)
-        cropped_length = cropped_video.duration
         cropped_video = cropped_video.without_audio()
         
-        # Generate Music
-        synthesiser = pipeline("text-to-audio", "facebook/musicgen-medium")
+        # Generate music
+        synthesiser = pipeline("text-to-audio", "facebook/musicgen-small")
         music = synthesiser("simple but energetic instrumental music", forward_params={"do_sample": True})
+        video_length = cropped_video.duration
+        cropped_music = mp.AudioClip(music["audio"]).subclip(0, video_length)
 
-        scipy.io.wavfile.write("musicgen_out.wav", rate=music["sampling_rate"], music=music["audio"])
+        # Combine music and audio
+        finished_video = cropped_video.setaudio(cropped_music)
+        finished_video.write_videofile(f"{output_path}.mp4")
 
     print("\nYour video is ready!")
-
     os.remove("video_tmp.mp4")
 
 if __name__ == "__main__":
