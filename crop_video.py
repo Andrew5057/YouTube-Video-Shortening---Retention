@@ -1,11 +1,9 @@
-# RUN ON PYTHON VERSION 3.10.11
-
 import os # To delete the temporary file
 import csv # To read analytics data
 import pandas as pd # To handle snippet selection
 from pytube import YouTube # To downlaod the video
 import moviepy.editor as mp # To crop videos
-from transformers import pipeline
+from transformers import pipeline # For AI music generation
 
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):
     # Gets important video metadata but does not download the mp4 file yet.
