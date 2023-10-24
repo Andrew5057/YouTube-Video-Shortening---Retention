@@ -5,8 +5,8 @@ import csv # To read analytics data
 import pandas as pd # To handle snippet selection
 from pytube import YouTube # To downlaod the video
 import moviepy.editor as mp # To crop videos
-from spleeter.separator import Separator
-from spleeter.audio.adapter import AudioAdapter
+from transformers import pipeline
+import scipy
 
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):
     # Gets important video metadata but does not download the mp4 file yet.
@@ -62,7 +62,7 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         clips = [to_clip.subclip(snippet, snippet+seconds_per_percent) for snippet in snippets]
         best_clips = mp.concatenate_videoclips(clips)
 
-        # Crops the video to 16:9 vertical format instead of horizontal
+        # Crop the video to 16:9 vertical format instead of horizontal
         vid_width = best_clips.size[0]
         vid_height = best_clips.size[1]
         new_width = int(9/16 * vid_height)
@@ -70,15 +70,13 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         y_center = int(vid_height / 2)
         cropped_video = best_clips.crop(x_center=x_center, y_center=y_center, width=new_width, height=vid_height)
         cropped_length = cropped_video.duration
-        cropped_video.without_audio().write_videofile(f"{output_path}.mp4")
-        to_clip.audio.write_audiofile("audio_tmp.mp3")
-    
-    audio_separator = Separator("spleeter:2stems")
-    audio_loader = AudioAdapter.default()
-    waveform, _ = audio_loader.load('audio_tmp.mp3', sample_rate=44100)
-    music = audio_separator.separate(waveform)
-    print(music)
+        cropped_video = cropped_video.without_audio()
+        
+        # Generate Music
+        synthesiser = pipeline("text-to-audio", "facebook/musicgen-medium")
+        music = synthesiser("simple but energetic instrumental music", forward_params={"do_sample": True})
 
+        scipy.io.wavfile.write("musicgen_out.wav", rate=music["sampling_rate"], music=music["audio"])
 
     print("\nYour video is ready!")
 
