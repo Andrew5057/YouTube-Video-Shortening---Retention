@@ -100,6 +100,7 @@ if __name__ == "__main__":
     crop_with_retention(url=url, retention_path=path, output_path=output, deadzones=deadzones)
 
 '''
+Recommended inputs:
 https://www.youtube.com/watch?v=xYYLI6HvWL0&pp=ygUVaWYgaSBoYWQgYSA1MDAgZG9sbGFy  
 Audience retention - If I had a $500 budget, this is what I'd build - Organic.csv
 500cropped
