@@ -3,7 +3,6 @@ import csv # To read analytics data
 import pandas as pd # To handle snippet selection
 from pytube import YouTube # To downlaod the video
 import moviepy.editor as mp # To crop videos
-from transformers import pipeline # For AI music generation
 
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):
     # Gets important video metadata but does not download the mp4 file yet.
@@ -43,12 +42,11 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
     snippets.sort()
 
     # Download the video. The file will be deleted after the function is done.
-    print("Downloading original video...")
+    '''print("Downloading original video...")
     stream_tag = video.streams.filter(file_extension="mp4")[0].itag
     stream = video.streams.get_by_itag(stream_tag)
     stream.download(filename="video_tmp.mp4")
-    print("Original video downloaded.\n")
-
+    print("Original video downloaded.\n")'''
 
     #buffer_neg = seconds_per_percent / 2
     #buffer_pos = seconds_per_percent - buffer_neg
@@ -67,16 +65,16 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         y_center = int(vid_height / 2)
         cropped_video = best_clips.crop(x_center=x_center, y_center=y_center, width=new_width, height=vid_height)
         cropped_video = cropped_video.without_audio()
+
+        cropped_video.write_videofile(f"{output_path}.mp4")
         
-        # Generate music
-        synthesiser = pipeline("text-to-audio", "facebook/musicgen-small")
-        music = synthesiser("simple but energetic instrumental music", forward_params={"do_sample": True})
+        """
         video_length = cropped_video.duration
-        cropped_music = mp.AudioClip(music["audio"]).subclip(0, video_length)
+        cropped_music = mp.AudioFileClip("audio_tmp.flac").subclip(0, video_length)
 
         # Combine music and audio
         finished_video = cropped_video.setaudio(cropped_music)
-        finished_video.write_videofile(f"{output_path}.mp4")
+        finished_video.write_videofile(f"{output_path}.mp4")"""
 
     print("\nYour video is ready!")
     os.remove("video_tmp.mp4")
@@ -103,11 +101,11 @@ if __name__ == "__main__":
 Recommended inputs:
 https://www.youtube.com/watch?v=xYYLI6HvWL0&pp=ygUVaWYgaSBoYWQgYSA1MDAgZG9sbGFy  
 Audience retention - If I had a $500 budget, this is what I'd build - Organic.csv
-500cropped
-
+Short - If I had a $500 budget, this is what I'd build
 36
 42
-
 420
 465
+done
+
 '''
