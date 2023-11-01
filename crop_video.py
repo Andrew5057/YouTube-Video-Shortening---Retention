@@ -75,8 +75,8 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         music2 = synthesiser("instagram tech video background music", forward_param={"do_sample": True})
         scipy.io.wavfile.write("audio_tmp.wav", rate=music["sampling_rate"], data=music["audio"])
         scipy.io.wavfile.write("audio_tmp2.wav", rate=music2["sampling_rate"], data=music2["audio"])
-        audio_clip1 = mp.AudioFileClip("audio_tmp.wav")
-        audio_clip2 = mp.AudioFileClip("audio_tmp2.wav")
+        audio_clip1 = mp.video.fx.all.fadeout(mp.AudioFileClip("audio_tmp.wav"), 3)
+        audio_clip2 = mp.video.fx.all.fadein(mp.AudioFileClip("audio_tmp2.wav"), 3)
         video_length = cropped_video.duration
         audio_clip = mp.concatenate_audioclips([audio_clip1, audio_clip2]).subclip(0, video_length)
         finished_video = cropped_video.set_audio(audio_clip)
