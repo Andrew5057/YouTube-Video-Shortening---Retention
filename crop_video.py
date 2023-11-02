@@ -6,6 +6,20 @@ import moviepy.editor as mp # To crop videos
 import transformers # To generate music
 import scipy # To write wav files
 
+def generate_music(destination, prompt="instagram tech video background music"):
+    synthesiser = transformers.pipeline("text-to-audio", "facebook/musicgen-small")
+    music = synthesiser(prompt)
+    music2 = synthesiser(prompt)
+    scipy.io.wavfile.write("audio_tmp.wav", rate=music["sampling_rate"], data=music["audio"])
+    scipy.io.wavfile.write("audio_tmp2.wav", rate=music2["sampling_rate"], data=music2["audio"])
+    audio_clip1 = mp.video.fx.all.fadeout(mp.AudioFileClip("audio_tmp.wav"), 3)
+    audio_clip2 = mp.video.fx.all.fadein(mp.AudioFileClip("audio_tmp2.wav"), 3)
+    audio_clip = mp.concatenate_audioclips([audio_clip1, audio_clip2])
+    audio_clip.write_audiofile(destination)
+
+    os.remove("audio_tmp.wav")
+    os.remove("audio_tmp2.wav")
+
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):    
     # Gets important video metadata but does not download the mp4 file yet.
     video: YouTube = YouTube(url)
@@ -67,29 +81,16 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         y_center = int(vid_height / 2)
         cropped_video = best_clips.crop(x_center=x_center, y_center=y_center, width=new_width, height=vid_height)
         cropped_video = cropped_video.without_audio()
-
-        # Generates music using the Facebook musicgen model
-        
-        synthesiser = transformers.pipeline("text-to-audio", "facebook/musicgen-small")
-        music = synthesiser("instagram tech video background music", forward_params={"do_sample": True})
-        music2 = synthesiser("instagram tech video background music", forward_param={"do_sample": True})
-        scipy.io.wavfile.write("audio_tmp.wav", rate=music["sampling_rate"], data=music["audio"])
-        scipy.io.wavfile.write("audio_tmp2.wav", rate=music2["sampling_rate"], data=music2["audio"])
-        audio_clip1 = mp.video.fx.all.fadeout(mp.AudioFileClip("audio_tmp.wav"), 3)
-        audio_clip2 = mp.video.fx.all.fadein(mp.AudioFileClip("audio_tmp2.wav"), 3)
         video_length = cropped_video.duration
-        audio_clip = mp.concatenate_audioclips([audio_clip1, audio_clip2]).subclip(0, video_length)
-        finished_video = cropped_video.set_audio(audio_clip)
-        finished_video.write_videofile(f"{output_path}.mp4")
-        
-        # Combine music and audio
-        finished_video = cropped_video.setaudio(audio_clip)
-        finished_video.write_videofile(f"{output_path}.mp4")
 
-    print("\nYour video is ready!")
+        for choice in range(1, 5):
+            generate_music(f"audio_tmp.wav")
+            audio_clip = mp.AudioFileClip(f"aduio_tmp.wav").subclip(0, video_length)
+            combined_video = cropped_video.set_audio(audio_clip)
+            combined_video.write(f"{output_path}-{choice}.mp4")
+    
     os.remove("video_tmp.mp4")
-    os.remove("audio_tmp.wav")
-    os.remove("audio_tmp2.wav")
+    print("\nYour video is ready!")
 
 if __name__ == "__main__":
     url = input("Enter the url of the video: ")
