@@ -3,22 +3,24 @@ import csv # To read analytics data
 import pandas as pd # To handle snippet selection
 from pytube import YouTube # To downlaod the video
 import moviepy.editor as mp # To crop videos
-import transformers # To generate music
-import scipy # To write wav files
+import requests
+import json
+import numpy as np
 
 def generate_music(destination, prompt="instagram tech video background music"):
-    synthesiser = transformers.pipeline("text-to-audio", "facebook/musicgen-small")
-    music = synthesiser(prompt)
-    music2 = synthesiser(prompt)
-    scipy.io.wavfile.write("audio_tmp.wav", rate=music["sampling_rate"], data=music["audio"])
-    scipy.io.wavfile.write("audio_tmp2.wav", rate=music2["sampling_rate"], data=music2["audio"])
-    audio_clip1 = mp.video.fx.all.fadeout(mp.AudioFileClip("audio_tmp.wav"), 3)
-    audio_clip2 = mp.video.fx.all.fadein(mp.AudioFileClip("audio_tmp2.wav"), 3)
-    audio_clip = mp.concatenate_audioclips([audio_clip1, audio_clip2])
-    audio_clip.write_audiofile(destination)
-
-    os.remove("audio_tmp.wav")
-    os.remove("audio_tmp2.wav")
+    API_URL = "https://api-inference.huggingface.co/models/facebook/musicgen-small"
+    headers = {"Authorization": "Bearer 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"}
+    params = json.dumps({
+        "inputs": prompt, 
+        "options": {
+            "wait_for_model": True
+        }
+    })
+    audio_bytes = requests.post(API_URL, headers=headers, data=params).content
+    #pcm_array = np.frombuffer(audio_bytes, dtype=np.int16)
+    #return audio_bytes
+    with open(f"{destination}.wav", "wb") as file:
+        file.write(audio_bytes)
 
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):    
     # Gets important video metadata but does not download the mp4 file yet.
@@ -81,13 +83,10 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         y_center = int(vid_height / 2)
         cropped_video = best_clips.crop(x_center=x_center, y_center=y_center, width=new_width, height=vid_height)
         cropped_video = cropped_video.without_audio()
-        video_length = cropped_video.duration
+        cropped_video.write_videofile(f"{output_path}.mp4")
 
-        for choice in range(1, 5):
-            generate_music(f"audio_tmp.wav")
-            audio_clip = mp.AudioFileClip(f"aduio_tmp.wav").subclip(0, video_length)
-            combined_video = cropped_video.set_audio(audio_clip)
-            combined_video.write(f"{output_path}-{choice}.mp4")
+    for choice in range(1, 5):
+        generate_music(f"Audio {choice} - {output_path}.wav")
     
     os.remove("video_tmp.mp4")
     print("\nYour video is ready!")
@@ -112,7 +111,7 @@ if __name__ == "__main__":
 
 '''
 Recommended inputs:
-https://www.youtube.com/watch?v=xYYLI6HvWL0&pp=ygUVaWYgaSBoYWQgYSA1MDAgZG9sbGFy  
+https://www.youtube.com/watch?v=xYYLI6HvWL0&pp=ygUVaWYgaSBoYWQgYSA1MDAgZG9sbGFy
 Audience retention - If I had a $500 budget, this is what I'd build - Organic.csv
 Short - If I had a $500 budget, this is what I'd build
 36
