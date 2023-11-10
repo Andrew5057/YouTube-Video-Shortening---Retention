@@ -5,11 +5,10 @@ from pytube import YouTube # To downlaod the video
 import moviepy.editor as mp # To crop videos
 import requests
 import json
-import numpy as np
 
-def generate_music(destination, prompt="instagram tech video background music"):
+def generate_music(destination: str, prompt: str = "instagram tech video background music"):
     API_URL = "https://api-inference.huggingface.co/models/facebook/musicgen-small"
-    headers = {"Authorization": "Bearer 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"}
+    headers = {"Authorization": f"Bearer {os.environ["HuggingFaceAPIKey"]}"}
     params = json.dumps({
         "inputs": prompt, 
         "options": {
@@ -86,7 +85,7 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         cropped_video.write_videofile(f"{output_path}.mp4")
 
     for prompt in ("instagram", "tiktok", "upbeat", "calm"):
-        generate_music(f"Audio - {prompt} - {output_path}.wav", prompt + "  tech video background music")
+        generate_music(f"Audio - {prompt} - {output_path}", prompt + "  tech video background music")
     
     os.remove("video_tmp.mp4")
     print("\nYour video is ready!")
