@@ -6,6 +6,7 @@ idna==3.4
 imageio==2.32.0
 imageio-ffmpeg==0.4.9
 moviepy==1.0.3
+numpy==1.26.1
 pandas==2.1.2
 Pillow==10.0.1
 proglog==0.1.10

@@ -21,6 +21,8 @@ def generate_music(destination: str, prompt: str = "instagram tech video backgro
     with open(f"{destination}.wav", "wb") as file:
         file.write(audio_bytes)
 
+generate_music("hi", "hi")
+
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):    
     # Gets important video metadata but does not download the mp4 file yet.
     video: YouTube = YouTube(url)
