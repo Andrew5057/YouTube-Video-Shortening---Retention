@@ -85,8 +85,8 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         cropped_video = cropped_video.without_audio()
         cropped_video.write_videofile(f"{output_path}.mp4")
 
-    for choice in range(1, 5):
-        generate_music(f"Audio {choice} - {output_path}.wav")
+    for prompt in ("instagram", "tiktok", "upbeat", "calm"):
+        generate_music(f"Audio - {prompt} - {output_path}.wav", prompt + "  tech video background music")
     
     os.remove("video_tmp.mp4")
     print("\nYour video is ready!")
