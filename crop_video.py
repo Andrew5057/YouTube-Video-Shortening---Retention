@@ -3,25 +3,6 @@ import csv # To read analytics data
 import pandas as pd # To handle snippet selection
 from pytube import YouTube # To downlaod the video
 import moviepy.editor as mp # To crop videos
-import requests
-import json
-
-def generate_music(destination: str, prompt: str = "instagram tech video background music"):
-    API_URL = "https://api-inference.huggingface.co/models/facebook/musicgen-small"
-    headers = {"Authorization": f"Bearer {os.environ["HuggingFaceAPIKey"]}"}
-    params = json.dumps({
-        "inputs": prompt, 
-        "options": {
-            "wait_for_model": True
-        }
-    })
-    audio_bytes = requests.post(API_URL, headers=headers, data=params).content
-    #pcm_array = np.frombuffer(audio_bytes, dtype=np.int16)
-    #return audio_bytes
-    with open(f"{destination}.wav", "wb") as file:
-        file.write(audio_bytes)
-
-generate_music("hi", "hi")
 
 def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedShort", max_seconds=60, deadzones=None):    
     # Gets important video metadata but does not download the mp4 file yet.
@@ -85,12 +66,10 @@ def crop_with_retention(url: str, retention_path: str, output_path = "ConvertedS
         cropped_video = best_clips.crop(x_center=x_center, y_center=y_center, width=new_width, height=vid_height)
         cropped_video = cropped_video.without_audio()
         cropped_video.write_videofile(f"{output_path}.mp4")
-
-    for prompt in ("instagram", "tiktok", "upbeat", "calm"):
-        generate_music(f"Audio - {prompt} - {output_path}", prompt + "  tech video background music")
     
     os.remove("video_tmp.mp4")
     print("\nYour video is ready!")
+
 
 if __name__ == "__main__":
     url = input("Enter the url of the video: ")
