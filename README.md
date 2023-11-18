@@ -21,6 +21,3 @@ Videos produced with this method have awkward jump cuts. This is in part because
 Videos produced with this method are not particularly content aware. This is because the program does not understand video structure. It is working purely off of user data.
 
 Videos produced with this method must have acquired a substantial number of views. Otherwise, retention becomes an unreliable statistic off of which to base the excerption.
-
-## Other Files
-media_data_collection.py: A collection of functions used to get the most popular videos + tags from given YouTube categories. Not used for video cropping.
